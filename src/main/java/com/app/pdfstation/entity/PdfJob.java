@@ -27,7 +27,7 @@ public class PdfJob {
     @Column(nullable = false)
     private String status; // CREATED
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String inputPath;
 
     private String outputPath;
