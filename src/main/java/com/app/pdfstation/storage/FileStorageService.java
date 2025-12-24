@@ -25,5 +25,13 @@ public class FileStorageService {
 
         return filePath.toString();
     }
+
+    public String generateOutputPath(UUID jobId) throws IOException {
+        Path outputDir = Paths.get("outputs", jobId.toString());
+        Files.createDirectories(outputDir);
+
+        return outputDir.resolve("compressed.pdf").toString();
+    }
+
 }
 

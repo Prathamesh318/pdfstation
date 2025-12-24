@@ -41,5 +41,8 @@ public class PdfJob {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @Column(nullable = false)
+    private int maxRetries = 3;
 }
 
