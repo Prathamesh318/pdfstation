@@ -1,0 +1,26 @@
+name: Backend Compile Check
+
+on:
+  push:
+    branches:
+      - master
+      - staging-*
+
+jobs:
+  compile:
+    name: Compile Spring Boot Backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Compile backend
+        working-directory: backend
+        run: mvn clean compile
