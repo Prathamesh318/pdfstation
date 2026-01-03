@@ -5,6 +5,8 @@ import com.app.pdfstation.domain.entity.PdfJob;
 import com.app.pdfstation.domain.repository.PdfJobRepository;
 import com.app.pdfstation.service.PdfCompressionService;
 import com.app.pdfstation.service.PdfMergeService;
+import com.app.pdfstation.service.PdfSplitService;
+import com.app.pdfstation.service.PdfProtectionService;
 import com.app.pdfstation.infrastructure.storage.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,8 @@ public class PdfJobConsumer {
     private final PdfCompressionService compressionService;
     private final FileStorageService storageService;
     private final PdfMergeService mergeService;
+    private final PdfSplitService splitService;
+    private final PdfProtectionService protectionService;
 
     @KafkaListener(topics = "pdf-jobs", groupId = "pdf-processor-group")
     public void consume(PdfJobCreatedEvent event) throws Exception {
@@ -61,6 +65,46 @@ public class PdfJobConsumer {
                 outputPath = storageService.generateMergedOutputPath(job.getId());
                 mergeService.merge(job.getInputPaths(), outputPath);
                 job.setOutputPath(outputPath);
+            }
+
+            if (PdfStationConstants.OPERATION_SPLIT.equals(job.getOperation())) {
+                String inputPath = job.getInputPaths().get(0);
+                String outputDir = storageService.generateSplitOutputDir(job.getId());
+                
+                List<java.io.File> splitPdfs;
+                
+                if ("pages".equals(job.getSplitType())) {
+                    splitPdfs = splitService.splitByPages(inputPath, job.getSplitRanges(), outputDir);
+                } else if ("interval".equals(job.getSplitType())) {
+                    splitPdfs = splitService.splitByInterval(inputPath, job.getSplitInterval(), outputDir);
+                } else if ("all".equals(job.getSplitType())) {
+                    splitPdfs = splitService.splitAll(inputPath, outputDir);
+                } else {
+                    throw new IllegalArgumentException("Invalid split type: " + job.getSplitType());
+                }
+                
+                String zipPath = outputDir + "/split.zip";
+                splitService.createZipArchive(splitPdfs, zipPath);
+                outputPath = zipPath;
+            } else if (PdfStationConstants.OPERATION_PROTECT.equals(job.getOperation())) {
+                String inputPath = job.getInputPaths().get(0);
+                outputPath = storageService.generateProtectedOutputPath(job.getId());
+                
+                if (PdfStationConstants.PROTECTION_ACTION_ADD.equals(job.getProtectionAction())) {
+                    PdfProtectionService.PermissionConfig permissions = new PdfProtectionService.PermissionConfig(
+                        job.getAllowPrinting(),
+                        job.getAllowCopying(),
+                        job.getAllowModification(),
+                        job.getAllowAssembly()
+                    );
+                    
+                    protectionService.protectPdf(inputPath, outputPath, 
+                        job.getUserPassword(), job.getOwnerPassword(), permissions);
+                } else if (PdfStationConstants.PROTECTION_ACTION_REMOVE.equals(job.getProtectionAction())) {
+                    protectionService.removeProtection(inputPath, outputPath, job.getUserPassword());
+                } else {
+                    throw new IllegalArgumentException("Invalid protection action: " + job.getProtectionAction());
+                }
             }
 
             job.setOutputPath(outputPath);

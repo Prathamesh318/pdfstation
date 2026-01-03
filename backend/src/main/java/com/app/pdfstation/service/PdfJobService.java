@@ -124,4 +124,129 @@ public class PdfJobService {
             throw new RuntimeException(PdfStationConstants.ERROR_FAILED_TO_LOAD, e);
         }
     }
+
+    @Transactional
+    public PdfJob createSplitJob(MultipartFile file, String splitType, String splitRanges, Integer splitInterval) throws IOException {
+        PdfJob job = new PdfJob();
+        job.setOperation(PdfStationConstants.OPERATION_SPLIT);
+        job.setStatus(PdfStationConstants.STATUS_CREATED);
+        job.setSplitType(splitType);
+        job.setSplitRanges(splitRanges);
+        job.setSplitInterval(splitInterval);
+
+        job = jobRepository.save(job);
+
+        String inputPath = storageService.saveFile(job.getId(), file);
+        job.setInputPaths(new java.util.ArrayList<>(Arrays.asList(inputPath)));
+        
+        final PdfJob savedJob = jobRepository.save(job);
+
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                new org.springframework.transaction.support.TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        eventProducer.publishJobCreatedEvent(
+                                new PdfJobCreatedEvent(savedJob.getId(), PdfStationConstants.OPERATION_SPLIT, null));
+                    }
+                });
+
+        return savedJob;
+    }
+
+    public UrlResource loadSplitPdfs(UUID jobId) throws MalformedURLException {
+        PdfJob job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new RuntimeException(PdfStationConstants.ERROR_JOB_NOT_FOUND));
+
+        if (!PdfStationConstants.STATUS_COMPLETED.equals(job.getStatus())) {
+            throw new RuntimeException(PdfStationConstants.ERROR_PDF_NOT_READY);
+        }
+
+        try {
+            Path filePath = Path.of(job.getOutputPath());
+            return new UrlResource(filePath.toUri());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(PdfStationConstants.ERROR_FAILED_TO_LOAD, e);
+        }
+    }
+
+    // Added getJob method per user request
+    public PdfJob getJob(UUID jobId) {
+        return jobRepository.findById(jobId)
+                .orElseThrow(() -> new RuntimeException(PdfStationConstants.ERROR_JOB_NOT_FOUND));
+    }
+
+    @Transactional
+    public PdfJob createProtectJob(MultipartFile file, String userPassword, String ownerPassword,
+                                   Boolean allowPrinting, Boolean allowCopying,
+                                   Boolean allowModification, Boolean allowAssembly) throws IOException {
+        PdfJob job = new PdfJob();
+        job.setOperation(PdfStationConstants.OPERATION_PROTECT);
+        job.setProtectionAction(PdfStationConstants.PROTECTION_ACTION_ADD);
+        job.setStatus(PdfStationConstants.STATUS_CREATED);
+        job.setUserPassword(userPassword);
+        job.setOwnerPassword(ownerPassword);
+        job.setAllowPrinting(allowPrinting != null ? allowPrinting : true);
+        job.setAllowCopying(allowCopying != null ? allowCopying : true);
+        job.setAllowModification(allowModification != null ? allowModification : true);
+        job.setAllowAssembly(allowAssembly != null ? allowAssembly : true);
+
+        job = jobRepository.save(job);
+
+        String inputPath = storageService.saveFile(job.getId(), file);
+        job.setInputPaths(new java.util.ArrayList<>(Arrays.asList(inputPath)));
+        final PdfJob savedJob = jobRepository.save(job);
+
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                new org.springframework.transaction.support.TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        eventProducer.publishJobCreatedEvent(
+                                new PdfJobCreatedEvent(savedJob.getId(), PdfStationConstants.OPERATION_PROTECT, null));
+                    }
+                });
+
+        return savedJob;
+    }
+
+    @Transactional
+    public PdfJob createRemoveProtectionJob(MultipartFile file, String password) throws IOException {
+        PdfJob job = new PdfJob();
+        job.setOperation(PdfStationConstants.OPERATION_PROTECT);
+        job.setProtectionAction(PdfStationConstants.PROTECTION_ACTION_REMOVE);
+        job.setStatus(PdfStationConstants.STATUS_CREATED);
+        job.setUserPassword(password);
+
+        job = jobRepository.save(job);
+
+        String inputPath = storageService.saveFile(job.getId(), file);
+        job.setInputPaths(new java.util.ArrayList<>(Arrays.asList(inputPath)));
+        final PdfJob savedJob = jobRepository.save(job);
+
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                new org.springframework.transaction.support.TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        eventProducer.publishJobCreatedEvent(
+                                new PdfJobCreatedEvent(savedJob.getId(), PdfStationConstants.OPERATION_PROTECT, null));
+                    }
+                });
+
+        return savedJob;
+    }
+
+    public UrlResource loadProtectedPdf(UUID jobId) throws MalformedURLException {
+        PdfJob job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new RuntimeException(PdfStationConstants.ERROR_JOB_NOT_FOUND));
+
+        if (!PdfStationConstants.STATUS_COMPLETED.equals(job.getStatus())) {
+            throw new RuntimeException(PdfStationConstants.ERROR_PDF_NOT_READY);
+        }
+
+        try {
+            Path filePath = Path.of(job.getOutputPath());
+            return new UrlResource(filePath.toUri());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(PdfStationConstants.ERROR_FAILED_TO_LOAD, e);
+        }
+    }
 }

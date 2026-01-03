@@ -64,4 +64,17 @@ public class FileStorageService {
         return outputDir.resolve(jobId + PdfStationConstants.COMPRESSED_SUFFIX).toString();
     }
 
+    public String generateSplitOutputDir(UUID jobId) throws IOException {
+        Path dir = Paths.get(COMPRESSED_OUTPUT_DIR, "split_" + jobId);
+        Files.createDirectories(dir);
+        return dir.toString();
+    }
+
+    public String generateProtectedOutputPath(UUID jobId) throws IOException {
+        Path outputDir = Paths.get(COMPRESSED_OUTPUT_DIR);
+        Files.createDirectories(outputDir);
+
+        return outputDir.resolve(jobId + "_protected.pdf").toString();
+    }
+
 }

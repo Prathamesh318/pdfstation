@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.UUID;
 
 @Tag(name = "PDF Jobs", description = "PDF processing operations including compression, merging, and downloading")
@@ -123,4 +124,80 @@ public class PdfJobController {
                 long estimatedSize = (long) (originalSize * (quality / 100.0) * 0.85); // simple heuristic
                 return ResponseEntity.ok(String.valueOf(estimatedSize));
         }
+
+        // ==================== Split Operations ====================
+
+        @Operation(summary = "Split PDF", description = "Split PDF by pages or interval")
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "Split job created successfully"),
+                @ApiResponse(responseCode = "400", description = "Invalid request")
+        })
+        @PostMapping("/split")
+        public ResponseEntity<CreateJobResponse> createSplitJob(
+                @RequestParam("file") MultipartFile file,
+                @RequestParam("splitType") String splitType,
+                @RequestParam(value = "splitRanges", required = false) String splitRanges,
+                @RequestParam(value = "splitInterval", required = false) Integer splitInterval) throws IOException {
+
+            PdfJob job = jobService.createSplitJob(file, splitType, splitRanges, splitInterval);
+            return ResponseEntity.ok(new CreateJobResponse(job.getId(), job.getStatus()));
+        }
+
+        @GetMapping("/{jobId}/download-split")
+        public ResponseEntity<UrlResource> downloadSplitPdf(@PathVariable UUID jobId) throws MalformedURLException {
+            UrlResource resource = jobService.loadSplitPdfs(jobId);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"split_" + jobId + ".zip\"")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
+        }
+
+    @Operation(summary = "Get Job Status", description = "Get the status and details of a PDF job")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Job details retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Job not found")
+    })
+    @GetMapping("/{jobId}")
+    public ResponseEntity<CreateJobResponse> getJob(
+            @Parameter(description = "Job ID", required = true) @PathVariable UUID jobId) {
+        PdfJob job = jobService.getJob(jobId);
+        return ResponseEntity.ok(new CreateJobResponse(job.getId(), job.getStatus()));
+    }
+
+    // ==================== Protection Operations ====================
+
+    @Operation(summary = "Protect PDF", description = "Add password protection and permissions to PDF")
+    @PostMapping("/protect")
+    public ResponseEntity<CreateJobResponse> protectPdf(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "userPassword", required = false) String userPassword,
+            @RequestParam(value = "ownerPassword", required = false) String ownerPassword,
+            @RequestParam(value = "allowPrinting", defaultValue = "true") Boolean allowPrinting,
+            @RequestParam(value = "allowCopying", defaultValue = "true") Boolean allowCopying,
+            @RequestParam(value = "allowModification", defaultValue = "true") Boolean allowModification,
+            @RequestParam(value = "allowAssembly", defaultValue = "true") Boolean allowAssembly) throws IOException {
+
+        PdfJob job = jobService.createProtectJob(file, userPassword, ownerPassword,
+                allowPrinting, allowCopying, allowModification, allowAssembly);
+        return ResponseEntity.ok(new CreateJobResponse(job.getId(), job.getStatus()));
+    }
+
+    @Operation(summary = "Remove Protection", description = "Remove password protection from PDF")
+    @PostMapping("/remove-protection")
+    public ResponseEntity<CreateJobResponse> removeProtection(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("password") String password) throws IOException {
+
+        PdfJob job = jobService.createRemoveProtectionJob(file, password);
+        return ResponseEntity.ok(new CreateJobResponse(job.getId(), job.getStatus()));
+    }
+
+    @GetMapping("/{jobId}/download-protected")
+    public ResponseEntity<UrlResource> downloadProtectedPdf(@PathVariable UUID jobId) throws MalformedURLException {
+        UrlResource resource = jobService.loadProtectedPdf(jobId);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"protected_" + jobId + ".pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(resource);
+    }
 }

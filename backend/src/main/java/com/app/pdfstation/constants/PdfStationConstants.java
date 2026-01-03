@@ -16,8 +16,12 @@ public final class PdfStationConstants {
     // ==================== PDF Operations ====================
     public static final String OPERATION_COMPRESS = "COMPRESS";
     public static final String OPERATION_MERGE = "MERGE";
-    public static final String OPERATION_SPLIT = "SPLIT"; // Future feature
-    public static final String OPERATION_PROTECT = "PROTECT"; // Future feature
+    public static final String OPERATION_SPLIT = "SPLIT";
+    public static final String OPERATION_PROTECT = "PROTECT";
+
+    // ==================== Protection Actions ====================
+    public static final String PROTECTION_ACTION_ADD = "ADD";
+    public static final String PROTECTION_ACTION_REMOVE = "REMOVE";
 
     // ==================== Job Statuses ====================
     public static final String STATUS_CREATED = "CREATED";

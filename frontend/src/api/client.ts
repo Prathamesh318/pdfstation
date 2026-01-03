@@ -107,4 +107,65 @@ export const apiClient = {
 
         return response.text();
     },
+
+    // ==================== Protection Operations ====================
+
+    // Protect PDF
+    protectPdf: async (
+        file: File,
+        userPassword?: string,
+        ownerPassword?: string,
+        permissions?: {
+            allowPrinting: boolean;
+            allowCopying: boolean;
+            allowModification: boolean;
+            allowAssembly: boolean;
+        }
+    ) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        if (userPassword) formData.append('userPassword', userPassword);
+        if (ownerPassword) formData.append('ownerPassword', ownerPassword);
+
+        if (permissions) {
+            formData.append('allowPrinting', permissions.allowPrinting.toString());
+            formData.append('allowCopying', permissions.allowCopying.toString());
+            formData.append('allowModification', permissions.allowModification.toString());
+            formData.append('allowAssembly', permissions.allowAssembly.toString());
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/pdf/jobs/protect`, {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to create protection job');
+        }
+
+        return response.json();
+    },
+
+    // Remove Protection
+    removeProtection: async (file: File, password: string) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('password', password);
+
+        const response = await fetch(`${API_BASE_URL}/api/pdf/jobs/remove-protection`, {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to create remove protection job');
+        }
+
+        return response.json();
+    },
+
+    // Download protected PDF
+    getProtectedDownloadUrl: (jobId: string) => {
+        return `${API_BASE_URL}/api/pdf/jobs/${jobId}/download-protected`;
+    }
 };
