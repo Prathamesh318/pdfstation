@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { FileText, Upload, Download, Loader2, ArrowLeft } from 'lucide-react';
 import { apiClient } from '../api/client';
 import type { CreateJobResponse } from '../types/api';
 
 export default function CompressPage() {
-    const navigate = useNavigate();
     const [file, setFile] = useState<File | null>(null);
     const [quality, setQuality] = useState(50);
     const [isDragging, setIsDragging] = useState(false);
