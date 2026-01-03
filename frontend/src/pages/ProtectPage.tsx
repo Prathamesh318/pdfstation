@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { apiClient } from '../api/client';
-import { ArrowLeft, Lock, Shield, Settings, Download, FileText, Check, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Lock, Shield, Download, FileText, Check, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function ProtectPage() {
