@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FileText, Merge, Zap, Scissors } from 'lucide-react';
+import { FileText, Merge, Zap, Scissors, Lock, Unlock } from 'lucide-react';
 
 export default function HomePage() {
     return (
@@ -21,6 +21,12 @@ export default function HomePage() {
                             </Link>
                             <Link to="/split" className="text-gray-700 hover:text-primary-600 transition">
                                 Split
+                            </Link>
+                            <Link to="/protect" className="text-gray-700 hover:text-primary-600 transition">
+                                Protect
+                            </Link>
+                            <Link to="/remove-protection" className="text-gray-700 hover:text-primary-600 transition">
+                                Remove Protection
                             </Link>
                         </nav>
                     </div>
@@ -101,6 +107,52 @@ export default function HomePage() {
                                 </p>
                                 <div className="flex items-center text-green-600 font-semibold group-hover:translate-x-2 transition-transform">
                                     Start Splitting
+                                    <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </Link>
+
+                        {/* Protect Card */}
+                        <Link
+                            to="/protect"
+                            className="group relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+                        >
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-red-100 rounded-bl-full opacity-50 group-hover:opacity-75 transition"></div>
+                            <div className="relative z-10">
+                                <div className="inline-flex items-center justify-center w-16 h-16 bg-red-600 rounded-xl mb-6">
+                                    <Lock className="w-8 h-8 text-white" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-gray-900 mb-3">Protect PDF</h3>
+                                <p className="text-gray-600 mb-4">
+                                    Encrypt your PDF with a password and set permissions to restrict printing or copying.
+                                </p>
+                                <div className="flex items-center text-red-600 font-semibold group-hover:translate-x-2 transition-transform">
+                                    Start Protecting
+                                    <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </Link>
+
+                        {/* Remove Protection Card */}
+                        <Link
+                            to="/remove-protection"
+                            className="group relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+                        >
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-100 rounded-bl-full opacity-50 group-hover:opacity-75 transition"></div>
+                            <div className="relative z-10">
+                                <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-600 rounded-xl mb-6">
+                                    <Unlock className="w-8 h-8 text-white" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-gray-900 mb-3">Unlock PDF</h3>
+                                <p className="text-gray-600 mb-4">
+                                    Remove password protection from your PDF files to make them freely accessible.
+                                </p>
+                                <div className="flex items-center text-yellow-600 font-semibold group-hover:translate-x-2 transition-transform">
+                                    Start Unlocking
                                     <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                     </svg>
