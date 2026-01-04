@@ -1,0 +1,108 @@
+name: Full Build Check (Frontend + Backend)
+
+on:
+  push:
+    branches:
+      - master
+      - staging-*
+  pull_request:
+    branches:
+      - master
+      - staging-*
+
+jobs:
+  backend:
+    name: Backend Compile Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Compile backend
+        working-directory: backend
+        run: mvn clean compile
+
+  frontend:
+    name: Frontend Build Check
+    runs-on: ubuntu-latest
+    needs: backend   # frontend runs only if backend succeeds
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+  notify:
+    name: Email Notification
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    if: always()   # run even if build fails
+
+    steps:
+      # ✅ SUCCESS EMAIL
+      - name: Send success email
+        if: needs.backend.result == 'success' && needs.frontend.result == 'success'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "✅ Build Successful (Frontend + Backend)"
+          to: ${{ secrets.MAIL_TO }}
+          from: GitHub Actions <${{ secrets.SMTP_USERNAME }}>
+          body: |
+            ✅ Full build succeeded!
+
+            Repository: ${{ github.repository }}
+            Event: ${{ github.event_name }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Workflow: ${{ github.workflow }}
+
+      # ❌ FAILURE EMAIL
+      - name: Send failure email
+        if: needs.backend.result == 'failure' || needs.frontend.result == 'failure'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "❌ Build Failed (Frontend or Backend)"
+          to: ${{ secrets.MAIL_TO }}
+          from: GitHub Actions <${{ secrets.SMTP_USERNAME }}>
+          body: |
+            ❌ Build failed!
+
+            Repository: ${{ github.repository }}
+            Event: ${{ github.event_name }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+
+            Backend status: ${{ needs.backend.result }}
+            Frontend status: ${{ needs.frontend.result }}
+
+            Logs:
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
