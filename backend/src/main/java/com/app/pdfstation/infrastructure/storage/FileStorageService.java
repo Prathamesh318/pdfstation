@@ -77,4 +77,9 @@ public class FileStorageService {
         return outputDir.resolve(jobId + "_protected.pdf").toString();
     }
 
+    public String generateWordOutputPath(UUID jobId) throws IOException {
+        Path outputDir = Paths.get(COMPRESSED_OUTPUT_DIR);
+        Files.createDirectories(outputDir);
+        return outputDir.resolve("converted_" + jobId + ".docx").toString();
+    }
 }

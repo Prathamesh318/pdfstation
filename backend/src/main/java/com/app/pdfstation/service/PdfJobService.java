@@ -249,4 +249,43 @@ public class PdfJobService {
             throw new RuntimeException(PdfStationConstants.ERROR_FAILED_TO_LOAD, e);
         }
     }
+    @Transactional
+    public PdfJob createPdfToWordJob(MultipartFile file) throws IOException {
+        PdfJob job = new PdfJob();
+        job.setOperation(PdfStationConstants.OPERATION_PDF_TO_WORD);
+        job.setStatus(PdfStationConstants.STATUS_CREATED);
+        
+        job = jobRepository.save(job);
+
+        String inputPath = storageService.saveFile(job.getId(), file);
+        job.setInputPaths(new java.util.ArrayList<>(Arrays.asList(inputPath)));
+        final PdfJob savedJob = jobRepository.save(job);
+
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                new org.springframework.transaction.support.TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        eventProducer.publishJobCreatedEvent(
+                                new PdfJobCreatedEvent(savedJob.getId(), PdfStationConstants.OPERATION_PDF_TO_WORD, null));
+                    }
+                });
+
+        return savedJob;
+    }
+
+    public UrlResource loadWordDoc(UUID jobId) {
+        PdfJob job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new RuntimeException(PdfStationConstants.ERROR_JOB_NOT_FOUND));
+
+        if (!PdfStationConstants.STATUS_COMPLETED.equals(job.getStatus())) {
+            throw new RuntimeException(PdfStationConstants.ERROR_PDF_NOT_READY);
+        }
+
+        try {
+            Path filePath = Path.of(job.getOutputPath());
+            return new UrlResource(filePath.toUri());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(PdfStationConstants.ERROR_FAILED_TO_LOAD, e);
+        }
+    }
 }

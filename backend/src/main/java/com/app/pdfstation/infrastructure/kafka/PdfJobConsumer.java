@@ -32,6 +32,7 @@ public class PdfJobConsumer {
     private final PdfMergeService mergeService;
     private final PdfSplitService splitService;
     private final PdfProtectionService protectionService;
+    private final com.app.pdfstation.service.PdfToWordService pdfToWordService;
 
     @KafkaListener(topics = "pdf-jobs", groupId = "pdf-processor-group")
     public void consume(PdfJobCreatedEvent event) throws Exception {
@@ -76,6 +77,9 @@ public class PdfJobConsumer {
                 if ("pages".equals(job.getSplitType())) {
                     splitPdfs = splitService.splitByPages(inputPath, job.getSplitRanges(), outputDir);
                 } else if ("interval".equals(job.getSplitType())) {
+                    if (job.getSplitInterval() == null) {
+                        throw new IllegalArgumentException("Split interval is required for interval split type");
+                    }
                     splitPdfs = splitService.splitByInterval(inputPath, job.getSplitInterval(), outputDir);
                 } else if ("all".equals(job.getSplitType())) {
                     splitPdfs = splitService.splitAll(inputPath, outputDir);
@@ -105,6 +109,11 @@ public class PdfJobConsumer {
                 } else {
                     throw new IllegalArgumentException("Invalid protection action: " + job.getProtectionAction());
                 }
+
+            } else if (PdfStationConstants.OPERATION_PDF_TO_WORD.equals(job.getOperation())) {
+                String inputPath = job.getInputPaths().get(0);
+                outputPath = storageService.generateWordOutputPath(job.getId());
+                pdfToWordService.convertPdfToWord(inputPath, outputPath);
             }
 
             job.setOutputPath(outputPath);

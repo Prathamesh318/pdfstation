@@ -18,6 +18,7 @@ public final class PdfStationConstants {
     public static final String OPERATION_MERGE = "MERGE";
     public static final String OPERATION_SPLIT = "SPLIT";
     public static final String OPERATION_PROTECT = "PROTECT";
+    public static final String OPERATION_PDF_TO_WORD = "PDF_TO_WORD";
 
     // ==================== Protection Actions ====================
     public static final String PROTECTION_ACTION_ADD = "ADD";

@@ -166,38 +166,56 @@ public class PdfJobController {
 
     // ==================== Protection Operations ====================
 
-    @Operation(summary = "Protect PDF", description = "Add password protection and permissions to PDF")
-    @PostMapping("/protect")
-    public ResponseEntity<CreateJobResponse> protectPdf(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "userPassword", required = false) String userPassword,
-            @RequestParam(value = "ownerPassword", required = false) String ownerPassword,
-            @RequestParam(value = "allowPrinting", defaultValue = "true") Boolean allowPrinting,
-            @RequestParam(value = "allowCopying", defaultValue = "true") Boolean allowCopying,
-            @RequestParam(value = "allowModification", defaultValue = "true") Boolean allowModification,
-            @RequestParam(value = "allowAssembly", defaultValue = "true") Boolean allowAssembly) throws IOException {
+        @Operation(summary = "Protect PDF", description = "Add password protection and permissions to PDF")
+        @PostMapping("/protect")
+        public ResponseEntity<CreateJobResponse> protectPdf(
+                @RequestParam("file") MultipartFile file,
+                @RequestParam(value = "userPassword", required = false) String userPassword,
+                @RequestParam(value = "ownerPassword", required = false) String ownerPassword,
+                @RequestParam(value = "allowPrinting", defaultValue = "true") Boolean allowPrinting,
+                @RequestParam(value = "allowCopying", defaultValue = "true") Boolean allowCopying,
+                @RequestParam(value = "allowModification", defaultValue = "true") Boolean allowModification,
+                @RequestParam(value = "allowAssembly", defaultValue = "true") Boolean allowAssembly) throws IOException {
 
-        PdfJob job = jobService.createProtectJob(file, userPassword, ownerPassword,
-                allowPrinting, allowCopying, allowModification, allowAssembly);
-        return ResponseEntity.ok(new CreateJobResponse(job.getId(), job.getStatus()));
-    }
+            PdfJob job = jobService.createProtectJob(file, userPassword, ownerPassword,
+                    allowPrinting, allowCopying, allowModification, allowAssembly);
+            return ResponseEntity.ok(new CreateJobResponse(job.getId(), job.getStatus()));
+        }
 
-    @Operation(summary = "Remove Protection", description = "Remove password protection from PDF")
-    @PostMapping("/remove-protection")
-    public ResponseEntity<CreateJobResponse> removeProtection(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("password") String password) throws IOException {
+        @Operation(summary = "Remove Protection", description = "Remove password protection from PDF")
+        @PostMapping("/remove-protection")
+        public ResponseEntity<CreateJobResponse> removeProtection(
+                @RequestParam("file") MultipartFile file,
+                @RequestParam("password") String password) throws IOException {
 
-        PdfJob job = jobService.createRemoveProtectionJob(file, password);
-        return ResponseEntity.ok(new CreateJobResponse(job.getId(), job.getStatus()));
-    }
+            PdfJob job = jobService.createRemoveProtectionJob(file, password);
+            return ResponseEntity.ok(new CreateJobResponse(job.getId(), job.getStatus()));
+        }
 
-    @GetMapping("/{jobId}/download-protected")
-    public ResponseEntity<UrlResource> downloadProtectedPdf(@PathVariable UUID jobId) throws MalformedURLException {
-        UrlResource resource = jobService.loadProtectedPdf(jobId);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"protected_" + jobId + ".pdf\"")
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(resource);
-    }
+        @GetMapping("/{jobId}/download-protected")
+        public ResponseEntity<UrlResource> downloadProtectedPdf(@PathVariable UUID jobId) throws MalformedURLException {
+            UrlResource resource = jobService.loadProtectedPdf(jobId);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"protected_" + jobId + ".pdf\"")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(resource);
+        }
+
+        @PostMapping("/pdf-to-word")
+        @Operation(summary = "Convert PDF to Word")
+        public ResponseEntity<CreateJobResponse> convertToWord(@RequestParam("file") MultipartFile file) throws IOException {
+            PdfJob job = jobService.createPdfToWordJob(file);
+            return ResponseEntity.ok(new CreateJobResponse(job.getId(), job.getStatus()));
+        }
+        
+        @GetMapping("/{jobId}/download-word")
+        @Operation(summary = "Download converted Word document")
+        public ResponseEntity<UrlResource> downloadWordDoc(@PathVariable UUID jobId) {
+             UrlResource resource = jobService.loadWordDoc(jobId);
+             return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"converted_" + jobId + ".docx\"")
+                    .body(resource);
+        }
+
 }

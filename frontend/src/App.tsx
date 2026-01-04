@@ -5,6 +5,7 @@ import MergePage from './pages/MergePage';
 import SplitPage from './pages/SplitPage';
 import ProtectPage from './pages/ProtectPage';
 import RemoveProtectionPage from './pages/RemoveProtectionPage';
+import PdfToWordPage from './pages/PdfToWordPage';
 import './index.css';
 
 import { ThemeProvider } from './context/ThemeContext';
@@ -21,6 +22,7 @@ function App() {
             <Route path="/split" element={<SplitPage />} />
             <Route path="/protect" element={<ProtectPage />} />
             <Route path="/remove-protection" element={<RemoveProtectionPage />} />
+            <Route path="/pdf-to-word" element={<PdfToWordPage />} />
           </Routes>
         </div>
       </Router>

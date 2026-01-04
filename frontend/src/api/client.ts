@@ -72,10 +72,10 @@ export const apiClient = {
         formData.append('splitType', splitType);
 
         if (ranges) {
-            formData.append('ranges', ranges);
+            formData.append('splitRanges', ranges);
         }
         if (interval !== undefined) {
-            formData.append('interval', interval.toString());
+            formData.append('splitInterval', interval.toString());
         }
 
         const response = await fetch(`${API_BASE_URL}/api/pdf/jobs/split`, {
@@ -167,5 +167,33 @@ export const apiClient = {
     // Download protected PDF
     getProtectedDownloadUrl: (jobId: string) => {
         return `${API_BASE_URL}/api/pdf/jobs/${jobId}/download-protected`;
+    },
+
+    // Convert PDF to Word
+    convertPdfToWord: async (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch(`${API_BASE_URL}/api/pdf/jobs/pdf-to-word`, {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to create PDF to Word job');
+        }
+
+        return response.json();
+    },
+
+    // Download Word Document
+    downloadWordDoc: async (jobId: string) => {
+        const response = await fetch(`${API_BASE_URL}/api/pdf/jobs/${jobId}/download-word`);
+
+        if (!response.ok) {
+            throw new Error('Failed to download file');
+        }
+
+        return response.blob();
     }
 };
