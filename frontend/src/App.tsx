@@ -22,7 +22,7 @@ function App() {
             <Route path="/split" element={<SplitPage />} />
             <Route path="/protect" element={<ProtectPage />} />
             <Route path="/remove-protection" element={<RemoveProtectionPage />} />
-            <Route path="/pdf-to-word" element={<PdfToWordPage />} />
+            {/* <Route path="/pdf-to-word" element={<PdfToWordPage />} /> */}
           </Routes>
         </div>
       </Router>

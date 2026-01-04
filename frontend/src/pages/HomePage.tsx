@@ -29,12 +29,6 @@ export default function HomePage() {
                             <Link to="/remove-protection" className="text-sm font-medium text-gray-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-white transition-colors">
                                 Unlock
                             </Link>
-                            <Link to="/pdf-to-word" className="text-sm font-medium text-gray-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-white transition-colors">
-                                To Word
-                            </Link>
-                            <Link to="/pdf-to-word" className="text-sm font-medium text-gray-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-white transition-colors">
-                                To Word
-                            </Link>
                             <div className="pl-4 border-l border-gray-200 dark:border-slate-800">
                                 <ThemeToggle />
                             </div>
@@ -78,7 +72,7 @@ export default function HomePage() {
                             </div>
                         </Link>
 
-                        {/* Merge Card */}
+                        Merge Card
                         <Link
                             to="/merge"
                             className="group relative bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
@@ -170,7 +164,7 @@ export default function HomePage() {
                             </div>
                         </Link>
 
-                        {/* PDF to Word Card */}
+                        {/* PDF to Word Card
                         <Link
                             to="/pdf-to-word"
                             className="group relative bg-white dark:bg-slate-900/50 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 dark:border-slate-800"
@@ -190,8 +184,8 @@ export default function HomePage() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                     </svg>
                                 </div>
-                            </div>
-                        </Link>
+                            </div> */}
+                        {/* </Link> */}
                     </div>
 
                     {/* Features */}
