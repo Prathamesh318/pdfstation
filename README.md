@@ -60,13 +60,14 @@ npm run dev
 ### Current (Phase 1)
 - ✅ **PDF Compression** - Industry-standard compression with quality control (0-100%)
 - ✅ **PDF Merge** - Combine multiple PDFs into a single document
+- ✅ **PDF Split** - Extract specific pages, ranges, or split into individual files
+- ✅ **PDF Protect** - Encrypt with passwords and configure permissions (print, copy, modify)
+- ✅ **PDF Unlock** - Remove password protection from PDF files
 - ✅ **Real-time Status** - Job processing with live updates
 - ✅ **Job History** - Track and download completed jobs
 - ✅ **RESTful API** - Complete API with Swagger documentation
 
 ### Planned (Phase 2+)
-- 🔄 **PDF Split** - Extract specific pages or ranges
-- 🔄 **PDF Protect** - Password protection and permissions
 - 🔄 **PDF Watermark** - Add text/image watermarks
 - 🔄 **Batch Processing** - Process multiple files simultaneously
 
@@ -85,7 +86,7 @@ npm run dev
 - **Framework:** React 18 + TypeScript
 - **Build Tool:** Vite
 - **State Management:** Zustand + React Query
-- **UI Components:** Shadcn/ui + Tailwind CSS
+- **UI Components:** Shadcn/ui + Tailwind CSS v4
 - **Animations:** Framer Motion
 
 ---
@@ -140,10 +141,16 @@ See [DEPLOYMENT.md](devdocs/DEPLOYMENT.md) for complete setup instructions.
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/pdf/jobs` | POST | Create compression/merge job |
+| `/api/pdf/jobs/compress` | POST | Create compression job |
+| `/api/pdf/jobs/merge` | POST | Merge multiple PDFs |
+| `/api/pdf/jobs/split` | POST | Split PDF by pages, interval, or all |
+| `/api/pdf/jobs/protect` | POST | Protect PDF with password/permissions |
+| `/api/pdf/jobs/remove-protection` | POST | Remove password protection |
+| `/api/pdf/jobs/{jobId}` | GET | Get job status |
 | `/api/pdf/jobs/{jobId}/download` | GET | Download compressed PDF |
 | `/api/pdf/jobs/{jobId}/download-merged` | GET | Download merged PDF |
-| `/api/pdf/jobs/merge` | POST | Merge multiple PDFs |
+| `/api/pdf/jobs/{jobId}/download-split` | GET | Download split PDFs (ZIP) |
+| `/api/pdf/jobs/{jobId}/download-protected` | GET | Download protected/unlocked PDF |
 | `/api/pdf/jobs/estimate-size` | GET | Estimate compressed size |
 
 **Full API documentation:** http://localhost:8081/swagger-ui.html
@@ -233,10 +240,7 @@ MIT License - see LICENSE file for details
 ---
 
 ## 📧 Support
-
-- **Issues:** [GitHub Issues](https://github.com/yourusername/pdfstation/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/yourusername/pdfstation/discussions)
-- **Email:** support@pdfstation.com
+- **Email:** prathamv31.08@gmail.com
 
 ---
 
